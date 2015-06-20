@@ -1,0 +1,18 @@
+#!/usr/bin/expect -f
+
+set user [lindex $argv 0]
+set pass [lindex $argv 1]
+
+spawn python manage.py syncdb --settings=settings.docker --migrate
+match_max 100000
+expect "Would you like to create one now? (yes/no): "
+send -- "yes\r"
+expect "Username (leave blank to use *): "
+send -- "$user\r"
+expect "Email address: "
+send -- "\r"
+expect "Password: "
+send -- "$pass\r"
+expect "Password (again): "
+send -- "$pass\r"
+expect eof
