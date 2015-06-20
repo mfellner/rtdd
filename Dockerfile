@@ -4,23 +4,25 @@ FROM alpine:3.2
 RUN echo nameserver 8.8.8.8 >> /etc/resolv.conf && \
     echo nameserver 8.8.4.4 >> /etc/resolv.conf && \
     apk add --update \
+      git \
       wget \
       ca-certificates \
       python \
       libxslt \
       expect \
-    && wget -nv -O rtfd.zip \
-    https://github.com/rtfd/readthedocs.org/archive/master.zip \
-    && unzip rtfd.zip && \
-    rm rtfd.zip && \
-    wget -nv --no-check-certificate \
-    -O- https://bootstrap.pypa.io/get-pip.py | python \
+    && wget -nv --no-check-certificate \
+      -O- https://bootstrap.pypa.io/get-pip.py | python \
+    && git clone https://github.com/rtfd/readthedocs.org.git \
+    && cd readthedocs.org \
+    && git checkout 8fc71e5f16 \
+    && rm -rf .git/ \
     && apk del \
+      git \
       wget \
       ca-certificates \
     && rm -rf /var/cache/apk/*
 
-WORKDIR readthedocs.org-master
+WORKDIR readthedocs.org
 
 # Install readthedocs.
 RUN echo nameserver 8.8.8.8 >> /etc/resolv.conf && \
@@ -46,12 +48,13 @@ RUN echo nameserver 8.8.8.8 >> /etc/resolv.conf && \
       zlib-dev \
       libxslt-dev \
       libxml2-dev \
+    && rm -rf /root/.cache/ \
     && rm -rf /var/cache/apk/*
 
 # Create sandboxed user.
 RUN adduser -D -H -g "" django && \
-    chown -R django:django /readthedocs.org-master && \
-    chmod -R 0770 /readthedocs.org-master
+    chown -R django:django /readthedocs.org && \
+    chmod -R 0770 /readthedocs.org
 
 USER django
 
